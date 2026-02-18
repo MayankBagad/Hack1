@@ -1,47 +1,5 @@
 # College Hackathon Management System
 
-## Quick Start (MVP API)
-
-### Prerequisites
-- Python 3.11+
-
-### Install
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .[test]
-```
-
-### Run API
-```bash
-uvicorn app.main:app --reload
-```
-
-API docs are available at `http://127.0.0.1:8000/docs`.
-
-### Run tests
-```bash
-pytest -q
-```
-
----
-
-## Deploy on Vercel (API)
-
-1. Push this repo to GitHub.
-2. In Vercel, import the repository as a new project.
-3. Ensure `vercel.json` and `api/index.py` are present (already included in this repo).
-4. In Vercel Project Settings → Environment Variables, set:
-   - `DATABASE_URL` to a managed Postgres URL for persistent data.
-5. Deploy and test:
-   - `https://<your-domain>/health`
-   - `https://<your-domain>/docs`
-
-### Notes
-- Local dev still defaults to SQLite (`sqlite:///./hackathon.db`) if `DATABASE_URL` is not set.
-- On Vercel, avoid SQLite for production-like testing because serverless file storage is ephemeral.
-
----
 
 An end-to-end, college-specific platform to run hackathons from registration to final evaluation with strong verification, QR-based access, and digital audit trails.
 

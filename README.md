@@ -1,30 +1,5 @@
 # College Hackathon Management System
 
-## Quick Start (MVP API)
-
-### Prerequisites
-- Python 3.11+
-
-### Install
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .[test]
-```
-
-### Run API
-```bash
-uvicorn app.main:app --reload
-```
-
-API docs are available at `http://127.0.0.1:8000/docs`.
-
-### Run tests
-```bash
-pytest -q
-```
-
----
 
 An end-to-end, college-specific platform to run hackathons from registration to final evaluation with strong verification, QR-based access, and digital audit trails.
 

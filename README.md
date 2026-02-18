@@ -1,5 +1,6 @@
 # College Hackathon Management System
 
+
 An end-to-end, college-specific platform to run hackathons from registration to final evaluation with strong verification, QR-based access, and digital audit trails.
 
 ## 1) Goals

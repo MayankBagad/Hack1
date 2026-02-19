@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from .models import QRPurpose, SubmissionRound, UserRole, VerificationStatus
 
@@ -7,6 +8,7 @@ from .models import QRPurpose, SubmissionRound, UserRole, VerificationStatus
 class UserCreate(BaseModel):
     name: str
     email: str = Field(min_length=5, max_length=255)
+    email: EmailStr
     phone: str
     role: UserRole = UserRole.STUDENT
 

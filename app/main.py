@@ -6,10 +6,15 @@ import secrets
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+import secrets
+
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .database import Base, EFFECTIVE_DATABASE_URL, engine, get_db
+
 from .models import (
     EvaluationCriterion,
     Hackathon,
@@ -67,6 +72,13 @@ def init_db():
 @app.get("/", include_in_schema=False)
 def root():
     return FileResponse("frontend/index.html")
+@app.get("/")
+def root():
+    return {
+        "message": "College Hackathon Management API",
+        "health": "/health",
+        "docs": "/docs",
+    }
 
 @app.get("/health")
 def health_check():

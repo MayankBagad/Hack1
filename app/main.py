@@ -7,12 +7,25 @@ import secrets
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from datetime import datetime
+import logging
+import secrets
+
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+import secrets
+
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .database import Base, EFFECTIVE_DATABASE_URL, engine, get_db
 from .models import (
     AuthSession,
+
+from .models import (
     EvaluationCriterion,
     Hackathon,
     ProblemStatement,
@@ -89,6 +102,16 @@ def require_roles(*roles: UserRole):
         return user
 
     return checker
+    UserCreate,
+    UserOut,
+    VerificationAction,
+)
+
+app = FastAPI(title="College Hackathon Management API", version="0.1.0")
+app.mount("/assets", StaticFiles(directory="frontend"), name="assets")
+
+
+logger = logging.getLogger(__name__)
 
 
 @app.on_event("startup")
@@ -107,6 +130,13 @@ def init_db():
 def root():
     return FileResponse("frontend/index.html")
 
+@app.get("/")
+def root():
+    return {
+        "message": "College Hackathon Management API",
+        "health": "/health",
+        "docs": "/docs",
+    }
 
 @app.get("/health")
 def health_check():
@@ -129,6 +159,11 @@ def signup(payload: UserSignup, db: Session = Depends(get_db)):
         role=payload.role,
         password_hash=_hash_password(payload.password),
     )
+@app.post("/auth/register", response_model=UserOut)
+def register(payload: UserCreate, db: Session = Depends(get_db)):
+    if db.query(User).filter((User.email == payload.email) | (User.phone == payload.phone)).first():
+        raise HTTPException(status_code=400, detail="User with email/phone already exists")
+    user = User(**payload.model_dump())
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -151,6 +186,8 @@ def me(user: User = Depends(get_current_user)):
 
 @app.post("/auth/verify-otp", response_model=UserOut)
 def verify_otp(payload: OTPVerify, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+@app.post("/auth/verify-otp", response_model=UserOut)
+def verify_otp(payload: OTPVerify, db: Session = Depends(get_db)):
     user = db.get(User, payload.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -164,6 +201,10 @@ def verify_otp(payload: OTPVerify, db: Session = Depends(get_db), _: User = Depe
 
 @app.post("/verification/upload-documents", response_model=UserOut)
 def upload_documents(payload: DocumentUpload, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def upload_documents(user_id: int, payload: DocumentUpload, db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     user.college_id_path = payload.college_id_path
     user.aadhaar_masked = payload.aadhaar_masked
     user.selfie_path = payload.selfie_path
@@ -187,6 +228,17 @@ def admin_verify(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.ADMIN)),
 ):
+def face_match(user_id: int, db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.college_id_path or not user.selfie_path:
+        raise HTTPException(status_code=400, detail="Upload documents first")
+    return {"user_id": user_id, "face_match": True, "score": 0.93}
+
+
+@app.patch("/admin/verification/{user_id}", response_model=UserOut)
+def admin_verify(user_id: int, payload: VerificationAction, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -202,6 +254,7 @@ def create_hackathon(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.ADMIN)),
 ):
+def create_hackathon(payload: HackathonCreate, db: Session = Depends(get_db)):
     hackathon = Hackathon(**payload.model_dump())
     db.add(hackathon)
     db.commit()
@@ -216,6 +269,7 @@ def add_problem_statement(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.ADMIN)),
 ):
+def add_problem_statement(hackathon_id: int, payload: ProblemStatementCreate, db: Session = Depends(get_db)):
     if not db.get(Hackathon, hackathon_id):
         raise HTTPException(status_code=404, detail="Hackathon not found")
     ps = ProblemStatement(hackathon_id=hackathon_id, **payload.model_dump())
@@ -229,6 +283,7 @@ def add_problem_statement(
 def create_team(payload: TeamCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.id != payload.captain_id and user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Can create only your own team")
+def create_team(payload: TeamCreate, db: Session = Depends(get_db)):
     if not db.get(Hackathon, payload.hackathon_id):
         raise HTTPException(status_code=404, detail="Hackathon not found")
     captain = db.get(User, payload.captain_id)
@@ -251,6 +306,12 @@ def create_team(payload: TeamCreate, db: Session = Depends(get_db), user: User =
             db.rollback()
             raise HTTPException(status_code=400, detail=f"Member {member_id} not verified")
         db.add(TeamMember(team_id=team.id, user_id=member_id))
+    for user_id in all_members:
+        user = db.get(User, user_id)
+        if not user or user.verification_status != VerificationStatus.APPROVED:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=f"Member {user_id} not verified")
+        db.add(TeamMember(team_id=team.id, user_id=user_id))
 
     db.commit()
     db.refresh(team)
@@ -276,6 +337,14 @@ def create_submission(payload: SubmissionCreate, db: Session = Depends(get_db), 
         raise HTTPException(status_code=403, detail="Only captain can submit")
 
     existing = db.query(Submission).filter(Submission.team_id == payload.team_id, Submission.round == payload.round).first()
+def create_submission(payload: SubmissionCreate, db: Session = Depends(get_db)):
+    _ensure_submission_allowed(db, payload.team_id, payload.round)
+
+    existing = (
+        db.query(Submission)
+        .filter(Submission.team_id == payload.team_id, Submission.round == payload.round)
+        .first()
+    )
     if existing and existing.status == SubmissionStatus.LOCKED:
         raise HTTPException(status_code=400, detail="Submission is locked")
 
@@ -303,6 +372,11 @@ def lock_submissions(
 ):
     updated = db.query(Submission).filter(Submission.round == round_name).update(
         {Submission.status: SubmissionStatus.LOCKED}, synchronize_session=False
+def lock_submissions(round_name: SubmissionRound, db: Session = Depends(get_db)):
+    updated = (
+        db.query(Submission)
+        .filter(Submission.round == round_name)
+        .update({Submission.status: SubmissionStatus.LOCKED}, synchronize_session=False)
     )
     db.commit()
     return {"locked_count": updated}
@@ -314,6 +388,7 @@ def add_criterion(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.ADMIN)),
 ):
+def add_criterion(payload: CriterionCreate, db: Session = Depends(get_db)):
     criterion = EvaluationCriterion(**payload.model_dump())
     db.add(criterion)
     db.commit()
@@ -325,6 +400,10 @@ def add_criterion(
 def submit_score(payload: ScoreCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role not in (UserRole.JUDGE, UserRole.ADMIN):
         raise HTTPException(status_code=403, detail="Judge role required")
+def submit_score(payload: ScoreCreate, db: Session = Depends(get_db)):
+    judge = db.get(User, payload.judge_id)
+    if not judge or judge.role != UserRole.JUDGE:
+        raise HTTPException(status_code=400, detail="Judge role required")
     criterion = db.get(EvaluationCriterion, payload.criterion_id)
     if not criterion or criterion.round != payload.round:
         raise HTTPException(status_code=400, detail="Invalid criterion for round")
@@ -346,6 +425,13 @@ def leaderboard(
     criteria = db.query(EvaluationCriterion).filter(
         EvaluationCriterion.hackathon_id == hackathon_id, EvaluationCriterion.round == round_name
     ).all()
+def leaderboard(hackathon_id: int, round_name: SubmissionRound, db: Session = Depends(get_db)):
+    teams = db.query(Team).filter(Team.hackathon_id == hackathon_id).all()
+    criteria = (
+        db.query(EvaluationCriterion)
+        .filter(EvaluationCriterion.hackathon_id == hackathon_id, EvaluationCriterion.round == round_name)
+        .all()
+    )
     weights = {c.id: c.weight for c in criteria}
     totals = defaultdict(float)
 
@@ -359,6 +445,15 @@ def leaderboard(
 
 @app.post("/qr/generate")
 def generate_qr(payload: QRGenerate, db: Session = Depends(get_db), _: User = Depends(require_roles(UserRole.ADMIN))):
+    for s in scores:
+        totals[s.team_id] += s.score * weights.get(s.criterion_id, 0.0)
+
+    rows = [LeaderboardRow(team_id=t.id, team_name=t.name, total_score=round(totals[t.id], 2)) for t in teams]
+    return sorted(rows, key=lambda r: r.total_score, reverse=True)
+
+
+@app.post("/qr/generate")
+def generate_qr(payload: QRGenerate, db: Session = Depends(get_db)):
     user = db.get(User, payload.user_id)
     if not user or user.verification_status != VerificationStatus.APPROVED:
         raise HTTPException(status_code=400, detail="Only verified users can receive QR")
@@ -372,6 +467,7 @@ def generate_qr(payload: QRGenerate, db: Session = Depends(get_db), _: User = De
 
 @app.post("/scan")
 def scan_qr(payload: ScanRequest, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def scan_qr(payload: ScanRequest, db: Session = Depends(get_db)):
     scanner = db.get(User, payload.scanner_id)
     if not scanner or scanner.role != UserRole.SCANNER:
         raise HTTPException(status_code=400, detail="Scanner role required")
@@ -393,6 +489,8 @@ def scan_qr(payload: ScanRequest, db: Session = Depends(get_db), _: User = Depen
         success = True
         message = "Scan successful"
         qr.status = QRStatus.CONSUMED
+        if qr.purpose in (QRPurpose.BREAKFAST, QRPurpose.LUNCH, QRPurpose.DINNER, QRPurpose.ENTRY):
+            qr.status = QRStatus.CONSUMED
 
     log = ScanLog(qr_token_id=qr.id, scanner_id=scanner.id, success=success, message=message)
     db.add(log)
@@ -406,6 +504,7 @@ def scan_analytics(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(UserRole.ADMIN)),
 ):
+def scan_analytics(hackathon_id: int, db: Session = Depends(get_db)):
     total_scans = (
         db.query(func.count(ScanLog.id))
         .join(QRToken, QRToken.id == ScanLog.qr_token_id)
@@ -418,6 +517,7 @@ def scan_analytics(
         .filter(QRToken.hackathon_id == hackathon_id, ScanLog.success.is_(True))
         .scalar()
     )
+
     by_purpose = (
         db.query(QRToken.purpose, func.count(ScanLog.id))
         .join(ScanLog, ScanLog.qr_token_id == QRToken.id)
@@ -429,4 +529,5 @@ def scan_analytics(
         "total_scans": total_scans or 0,
         "successful_scans": successful or 0,
         "by_purpose": {purpose.value: count for purpose, count in by_purpose},
+        "by_purpose": {p.value: c for p, c in by_purpose},
     }

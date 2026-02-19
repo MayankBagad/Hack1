@@ -31,6 +31,7 @@ pytest -q
 - It now includes full authentication (signup/login/password) and role-based panels:
   - **Admin panel**: verification approvals, hackathon setup, criteria, QR generation, analytics
   - **User panel**: document upload, team creation, round submissions
+- Use the dashboard cards to execute registration, verification, hackathon setup, team creation, submission, scoring, leaderboard, QR generation, and scan flows.
 
 ---
 
@@ -156,6 +157,7 @@ An end-to-end, college-specific platform to run hackathons from registration to 
 - **Cache/Queue**: Redis + BullMQ/Celery
 - **Storage**: S3-compatible object storage
 - **Auth**: Bearer token session auth (implemented), JWT/refresh tokens optional future upgrade
+- **Auth**: JWT + refresh tokens + optional SSO
 - **Notifications**: Email + SMS provider integration
 - **Face Match**: Pluggable provider/API
 

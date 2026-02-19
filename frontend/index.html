@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hackathon Platform</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+<header>
+  <h1>Hackathon Platform</h1>
+  <p>Full auth + role panels (Admin/User/Judge/Scanner)</p>
+</header>
+
+<main>
+  <section class="card" id="authCard">
+    <h2>Authentication</h2>
+    <div class="split">
+      <div>
+        <h3>Sign Up</h3>
+        <input id="suName" placeholder="Name">
+        <input id="suEmail" placeholder="Email">
+        <input id="suPhone" placeholder="Phone">
+        <input id="suPass" placeholder="Password" type="password">
+        <select id="suRole"><option>STUDENT</option><option>ADMIN</option><option>JUDGE</option><option>SCANNER</option></select>
+        <button onclick="signup()">Sign Up</button>
+      </div>
+      <div>
+        <h3>Login</h3>
+        <input id="liEmail" placeholder="Email">
+        <input id="liPass" placeholder="Password" type="password">
+        <button onclick="login()">Login</button>
+      </div>
+    </div>
+    <pre id="authOut"></pre>
+  </section>
+
+  <section class="card hidden" id="sessionCard">
+    <h2>Session</h2>
+    <p id="whoami"></p>
+    <button onclick="loadMe()">Refresh /auth/me</button>
+    <button onclick="logout()">Logout</button>
+    <pre id="meOut"></pre>
+  </section>
+
+  <section class="grid hidden" id="adminPanel">
+    <div class="card"><h3>Admin: Verify Student</h3><input id="vUser" placeholder="User ID"><select id="vStatus"><option>APPROVED</option><option>REJECTED</option></select><button onclick="verifyStudent()">Update</button><pre id="vOut"></pre></div>
+    <div class="card"><h3>Admin: Create Hackathon</h3><input id="hTitle" placeholder="Title"><input id="hDesc" placeholder="Description"><button onclick="createHackathon()">Create</button><pre id="hOut"></pre></div>
+    <div class="card"><h3>Admin: Problem Statement</h3><input id="psH" placeholder="Hackathon ID"><input id="psT" placeholder="Title"><input id="psD" placeholder="Description"><button onclick="createPS()">Add</button><pre id="psOut"></pre></div>
+    <div class="card"><h3>Admin: Evaluation Criterion</h3><input id="cH" placeholder="Hackathon ID"><input id="cN" placeholder="Name"><input id="cW" placeholder="Weight"><button onclick="addCriterion()">Add</button><pre id="cOut"></pre></div>
+    <div class="card"><h3>Admin: Generate QR</h3><input id="qU" placeholder="User ID"><input id="qH" placeholder="Hackathon ID"><select id="qP"><option>ENTRY</option><option>BREAKFAST</option><option>LUNCH</option><option>DINNER</option></select><button onclick="generateQr()">Generate</button><pre id="qOut"></pre></div>
+    <div class="card"><h3>Admin: Scan Analytics</h3><input id="aH" placeholder="Hackathon ID"><button onclick="scanAnalytics()">Load</button><pre id="aOut"></pre></div>
+  </section>
+
+  <section class="grid hidden" id="userPanel">
+    <div class="card"><h3>User: Upload Verification Docs</h3><input id="docId" placeholder="College ID Path"><input id="docAa" placeholder="Aadhaar Masked"><input id="docSf" placeholder="Selfie Path"><button onclick="uploadDocs()">Upload</button><pre id="docOut"></pre></div>
+    <div class="card"><h3>User: Face Match</h3><button onclick="faceMatch()">Run</button><pre id="fmOut"></pre></div>
+    <div class="card"><h3>User: Create Team</h3><input id="tH" placeholder="Hackathon ID"><input id="tN" placeholder="Team Name"><input id="tC" placeholder="Captain ID"><input id="tP" placeholder="Problem Statement ID"><button onclick="createTeam()">Create</button><pre id="tOut"></pre></div>
+    <div class="card"><h3>User: Submit PPT</h3><input id="sT" placeholder="Team ID"><input id="sL" placeholder="PPT Link"><button onclick="submitPpt()">Submit</button><pre id="sOut"></pre></div>
+  </section>
+</main>
+<script src="/assets/app.js"></script>
+</body>
+</html>

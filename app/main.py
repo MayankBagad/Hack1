@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import logging
 
 import secrets
 
@@ -7,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from .database import Base, EFFECTIVE_DATABASE_URL, engine, get_db
 
 from .models import (
     EvaluationCriterion,
@@ -46,6 +48,29 @@ from .schemas import (
 app = FastAPI(title="College Hackathon Management API", version="0.1.0")
 
 
+logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+def init_db():
+    try:
+        Base.metadata.create_all(bind=engine)
+        app.state.db_ready = True
+        app.state.startup_error = None
+    except Exception as exc:
+        app.state.db_ready = False
+        app.state.startup_error = str(exc)
+        logger.exception("Database initialization failed during startup")
+
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok" if getattr(app.state, "db_ready", False) else "degraded",
+        "db_ready": getattr(app.state, "db_ready", False),
+        "database_backend": EFFECTIVE_DATABASE_URL.split(":", 1)[0],
+        "startup_error": getattr(app.state, "startup_error", None),
+    }
 
 
 @app.post("/auth/register", response_model=UserOut)

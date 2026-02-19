@@ -45,6 +45,7 @@ pytest -q
 
 ### Troubleshooting Vercel 500 (Function Crashed)
 - Open `/health` and check `db_ready` and `startup_error` fields.
+- If logs show `email-validator is not installed`, redeploy latest code (which removes runtime `EmailStr` dependency) or ensure dependency install succeeds.
 - If `db_ready` is `false`, configure `DATABASE_URL` to managed Postgres in Vercel env vars.
 - Redeploy after changing env vars.
 

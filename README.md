@@ -17,12 +17,18 @@ pip install -e .[test]
 uvicorn app.main:app --reload
 ```
 
+Web app is available at `http://127.0.0.1:8000/`.
+
 API docs are available at `http://127.0.0.1:8000/docs`.
 
 ### Run tests
 ```bash
 pytest -q
 ```
+
+### Frontend (Web UI)
+- The frontend is served by FastAPI at `/` using static files from `frontend/`.
+- Use the dashboard cards to execute registration, verification, hackathon setup, team creation, submission, scoring, leaderboard, QR generation, and scan flows.
 
 ---
 

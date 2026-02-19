@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hackathon Management System</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>College Hackathon Management System</h1>
+    <p>End-to-end workflow: verification → registration → evaluation → QR entry/food → analytics.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>System Health</h2>
+      <button onclick="checkHealth()">Check /health</button>
+      <pre id="healthOut"></pre>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>1) Register User</h3>
+        <input id="uName" placeholder="Name" />
+        <input id="uEmail" placeholder="Email" />
+        <input id="uPhone" placeholder="Phone" />
+        <select id="uRole">
+          <option>STUDENT</option><option>ADMIN</option><option>JUDGE</option><option>SCANNER</option>
+        </select>
+        <button onclick="registerUser()">Register</button>
+        <pre id="registerOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>2) OTP Verify + Approve Student</h3>
+        <input id="otpUserId" placeholder="User ID" />
+        <button onclick="verifyOtp()">Verify OTP (123456)</button>
+        <button onclick="approveStudent()">Approve Student</button>
+        <pre id="verifyOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>3) Create Hackathon</h3>
+        <input id="hTitle" placeholder="Hackathon title" />
+        <input id="hDesc" placeholder="Description" />
+        <button onclick="createHackathon()">Create</button>
+        <pre id="hackOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>4) Add Problem Statement</h3>
+        <input id="psHackId" placeholder="Hackathon ID" />
+        <input id="psTitle" placeholder="PS Title" />
+        <input id="psDesc" placeholder="PS Description" />
+        <button onclick="createPS()">Add PS</button>
+        <pre id="psOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>5) Create Team</h3>
+        <input id="tHackId" placeholder="Hackathon ID" />
+        <input id="tName" placeholder="Team name" />
+        <input id="tCaptain" placeholder="Captain ID" />
+        <input id="tPS" placeholder="Problem Statement ID" />
+        <button onclick="createTeam()">Create Team</button>
+        <pre id="teamOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>6) Submit Round-1 PPT</h3>
+        <input id="sTeam" placeholder="Team ID" />
+        <input id="sPpt" placeholder="PPT URL" />
+        <button onclick="submitRound1()">Submit</button>
+        <pre id="subOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>7) Add Criterion + Score</h3>
+        <input id="cHack" placeholder="Hackathon ID" />
+        <input id="cName" placeholder="Criterion name" />
+        <input id="cWeight" placeholder="Weight (e.g. 0.4)" />
+        <input id="scTeam" placeholder="Team ID" />
+        <input id="scJudge" placeholder="Judge ID" />
+        <input id="scVal" placeholder="Score" />
+        <button onclick="addCriterionAndScore()">Save</button>
+        <pre id="scoreOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>8) Leaderboard</h3>
+        <input id="lHack" placeholder="Hackathon ID" />
+        <button onclick="loadLeaderboard()">Load</button>
+        <pre id="leaderOut"></pre>
+      </div>
+
+      <div class="card">
+        <h3>9) Generate Meal QR + Scan</h3>
+        <input id="qUser" placeholder="User ID" />
+        <input id="qHack" placeholder="Hackathon ID" />
+        <input id="qScanner" placeholder="Scanner ID" />
+        <button onclick="genAndScan()">Generate Lunch QR + Scan</button>
+        <pre id="qrOut"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>

@@ -1,6 +1,11 @@
 from collections import defaultdict
 from datetime import datetime
 import logging
+import secrets
+
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import secrets
 
@@ -46,6 +51,7 @@ from .schemas import (
 )
 
 app = FastAPI(title="College Hackathon Management API", version="0.1.0")
+app.mount("/assets", StaticFiles(directory="frontend"), name="assets")
 
 
 logger = logging.getLogger(__name__)
@@ -63,6 +69,9 @@ def init_db():
         logger.exception("Database initialization failed during startup")
 
 
+@app.get("/", include_in_schema=False)
+def root():
+    return FileResponse("frontend/index.html")
 @app.get("/")
 def root():
     return {

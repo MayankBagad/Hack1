@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 import logging
+
 import secrets
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -8,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .database import Base, EFFECTIVE_DATABASE_URL, engine, get_db
+
 from .models import (
     EvaluationCriterion,
     Hackathon,

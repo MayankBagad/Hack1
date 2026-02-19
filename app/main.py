@@ -43,7 +43,6 @@ from .schemas import (
 )
 
 app = FastAPI(title="College Hackathon Management API", version="0.1.0")
-Base.metadata.create_all(bind=engine)
 
 
 @app.get("/health")

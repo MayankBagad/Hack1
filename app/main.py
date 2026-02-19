@@ -63,6 +63,14 @@ def init_db():
         logger.exception("Database initialization failed during startup")
 
 
+@app.get("/")
+def root():
+    return {
+        "message": "College Hackathon Management API",
+        "health": "/health",
+        "docs": "/docs",
+    }
+
 @app.get("/health")
 def health_check():
     return {

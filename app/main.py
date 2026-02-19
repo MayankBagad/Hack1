@@ -1,12 +1,13 @@
 from collections import defaultdict
 from datetime import datetime
+
 import secrets
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from .database import Base, engine, get_db
+
 from .models import (
     EvaluationCriterion,
     Hackathon,
@@ -45,9 +46,6 @@ from .schemas import (
 app = FastAPI(title="College Hackathon Management API", version="0.1.0")
 
 
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
 
 
 @app.post("/auth/register", response_model=UserOut)

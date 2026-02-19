@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -51,6 +52,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
     role: Mapped[UserRole] = mapped_column(SqlEnum(UserRole), default=UserRole.STUDENT)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     verification_status: Mapped[VerificationStatus] = mapped_column(
         SqlEnum(VerificationStatus), default=VerificationStatus.PENDING
     )
@@ -59,6 +61,15 @@ class User(Base):
     aadhaar_masked: Mapped[str | None] = mapped_column(String(32), nullable=True)
     selfie_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    token: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
 
 
 class Hackathon(Base):

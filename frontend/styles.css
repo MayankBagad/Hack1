@@ -1,3 +1,13 @@
+body { font-family: Inter, Arial, sans-serif; margin: 0; background: #f1f5f9; color: #0f172a; }
+header { background:#0f172a; color:white; padding:16px 20px; }
+main { padding:16px; }
+.card { background:white; border-radius:10px; padding:12px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+.split { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+input, select, button { width:100%; padding:8px; margin:4px 0; border:1px solid #cbd5e1; border-radius:6px; }
+button { background:#2563eb; color:#fff; border:none; }
+pre { background:#020617; color:#cbd5e1; padding:8px; border-radius:6px; min-height:48px; white-space:pre-wrap; }
+.hidden { display:none; }
 body { font-family: Arial, sans-serif; margin: 0; background: #f4f6fb; color: #1a1d2d; }
 header { background: #1d4ed8; color: white; padding: 18px 24px; }
 main { padding: 18px; }

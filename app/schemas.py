@@ -5,6 +5,25 @@ from pydantic import BaseModel, EmailStr, Field
 from .models import QRPurpose, SubmissionRound, UserRole, VerificationStatus
 
 
+class UserSignup(BaseModel):
+    name: str
+    email: str = Field(min_length=5, max_length=255)
+    phone: str
+    password: str = Field(min_length=6, max_length=128)
+    role: UserRole = UserRole.STUDENT
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: "UserOut"
+
+
 class UserCreate(BaseModel):
     name: str
     email: str = Field(min_length=5, max_length=255)

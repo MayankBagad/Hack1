@@ -45,11 +45,6 @@ from .schemas import (
 app = FastAPI(title="College Hackathon Management API", version="0.1.0")
 
 
-@app.on_event("startup")
-def init_db():
-    Base.metadata.create_all(bind=engine)
-
-
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
